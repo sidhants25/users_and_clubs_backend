@@ -18,6 +18,7 @@ def main():
 def api():
     return jsonify({"message": "Welcome to the Penn Club Review API!."})
 
+#Returns relevant club information for GET requests
 def return_clubs(clubs):
     return_list = []
     for club in clubs:
@@ -31,7 +32,7 @@ def return_clubs(clubs):
         return_list.append(club_info)
     return jsonify(return_list)
 
-
+#Makes a club with the given JSON information for POST requests, pretty standard stuff
 def make_club():
     req = request.get_json()
     club_code, club_name = req.get('code'), req.get('name')
@@ -42,6 +43,7 @@ def make_club():
     db.session.commit()
     return club_name + " created successfully!"
 
+#Returns a list of all clubs, or clubs that match the search parameter. You can also use the POST method to create a new club.
 @app.route('/api/clubs', methods=['GET', 'POST'])
 def clubs():
         if request.method == 'POST':
@@ -55,7 +57,7 @@ def clubs():
              clubs = db.session.query(Club).all()
              return return_clubs(clubs)
     
-
+#Allows you to modify information for an inputted club
 @app.route('/api/clubs/<string:code>', methods=['PATCH'])
 def modify_club_info(code):
     req = request.get_json()
@@ -70,12 +72,13 @@ def modify_club_info(code):
     else:
         return "Club with code " + code + " not found", 404
 
-
+#Displays cool, relevant, and public (can't be exposing info) information for a user
 @app.route('/api/user/<string:username>')
 def show_profile(username):
     user = User.query.filter_by(username=username).first()
-    return jsonify(username=user.username, name = user.name, major = user.major, graduation_year = user.graduation_year, interests = user.interests)
+    return jsonify(username=user.username, name = user.name, major = user.major, graduation_year = user.graduation_year, interests = user.interests, favorites = user.favorites)
 
+#Allows a user to add a club to their list of favorites. Accordingly adjusts their profile as well as the club they entered
 @app.route('/api/<string:user>/favorite', methods=['POST'])
 def favorite_club(user):
     req = request.get_json()
@@ -105,6 +108,52 @@ def favorite_club(user):
 
     return jsonify({"message": "Club favorited successfully"}), 200
 
+
+#Method for getting a list of clubs by a given tag
+@app.route('/api/tags', methods=['GET'])
+def clubs_by_tag():
+    tag = request.args.get('tag')
+    print(tag)
+
+    clubs_with_tag = Club.query.filter(Club.tags.contains(tag)).all()
+    print(clubs_with_tag)
+
+    if not clubs_with_tag:
+        return jsonify({"message": "No clubs found with the specified tag"}), 404
+
+    club_names = [club.name for club in clubs_with_tag]
+
+    return jsonify({"Clubs with the " + tag + " include:": club_names}), 200
+
+
+#My own route. Matches a user with clubs based on their interests and the clubs tag.
+@app.route('/api/match-with-clubs/<string:username>', methods=['GET'])
+def clubs_by_user_interests(username):
+    user = User.query.get(username)
+
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+
+    user_interests = user.interests
+
+    if not user_interests:
+        return jsonify({"message": "User has no specified interests"}), 400
+
+    matching_clubs = []
+
+    for interest in user_interests:
+        clubs_for_interest = Club.query.filter(Club.tags.contains(interest)).all()
+        matching_clubs.extend(clubs_for_interest)
+    
+    print(matching_clubs)
+    
+
+    if not matching_clubs:
+        return jsonify({"message": "No matching clubs found"}), 404
+
+    club_names = [club.name for club in matching_clubs]
+
+    return jsonify({"Check out these clubs, they match with your interests: ": club_names}), 200
 
 
 if __name__ == '__main__':

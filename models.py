@@ -1,16 +1,26 @@
 from app import db
-from sqlalchemy import ARRAY
+from sqlalchemy import JSON
 
 
 class Club(db.Model):
     code = db.Column(db.String(30), primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.String(), unique=False, nullable=False, default='')
-    tags = db.Column(ARRAY(db.String), nullable=True)
+    tags = db.Column(JSON)
 
-    def __repr__(self):
-        return '<Club %r>' % self.code
 
+class User(db.Model):
+    username = db.Column(db.String(30), primary_key=True)
+    penn_id = db.Column(db.Integer(), nullable=False, unique=True)
+    name = db.Column(db.String(100), unique=False, nullable=False)
+    major = db.Column(db.String(100), unique=False, nullable=True)
+    graduation_year = db.Column(db.String(4), unique=False, nullable=False)
+    interests = db.Column(JSON)
+
+
+# __table_args__ = (
+#         CheckConstraint('LENGTH(CAST(penn_id AS TEXT)) = 8', name='check_penn_id_length'),
+#     )
 
 
 # Your database models should go here.

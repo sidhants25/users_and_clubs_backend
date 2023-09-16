@@ -32,6 +32,9 @@ Certain routes (such as 'match with clubs', editing user info, and favoriting cl
 
 If I had more time, I would have implemented autherization for clubs, where only certain admins would be able to edit/add/delete club information.
 
+VI. Bonus Features
+
+
 ## Installation
 
 1. Click the green "use this template" button to make your own copy of this repository, and clone it. Make sure to create a **private repository**.

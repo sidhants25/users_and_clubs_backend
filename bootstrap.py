@@ -1,12 +1,16 @@
 import os
-from app import app, db, DB_FILE
+from app import  app, db, DB_FILE
 from models import *
 import json
 
 def create_user():
     # with app.app_context():
-    josh = User(username = 'josh_iz_da_best', password_hash = 'Josh123', penn_id=12345678, name='Josh', major='Computer Science', graduation_year='2026', interests=['Athletics', 'Technology', 'Poker'], favorites= ['pppjo'])
+    josh = User(username = 'josh_iz_da_best', penn_id=12345678, name='Josh', major='Computer Science', graduation_year='2026', interests=['Athletics', 'Technology', 'Poker'], favorites= ['pppjo'])
+    sid = User(username = 'sid_the_kid', penn_id=87654321, name='Sid', major='Physical Education', graduation_year='2026', interests=['Undergraduate', 'Academic', 'Weightlifting'], favorites= ['pppp', 'locustlabs'])
+    josh.set_password('Josh123')
+    sid.set_password('Sid123')
     db.session.add(josh)
+    db.session.add(sid)
     db.session.commit()
 
 

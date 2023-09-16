@@ -1,4 +1,3 @@
-from models import *
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import create_access_token
@@ -14,6 +13,7 @@ app.config['JWT_SECRET_KEY'] = 'Sidhant123'  # Replace with a strong secret key
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
+from models import *
 
 # Part of Authentification. Register yourself with the database; the password you enter automatically gets hashed in the set_password method. Need to login next to get a token. This also makes sure
 # that the username is not already taken.
@@ -25,7 +25,7 @@ def register():
     major = req.get('major')
     penn_id = req.get('penn_id')
     graduation_year = req.get('graduation_year')
-    password = req.get('password_hash')
+    password = req.get('password')
 
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
@@ -41,13 +41,12 @@ def register():
     return jsonify({'message': 'User registered successfully'}), 201
 
 # Once a user is registered, they can login to get a token. This token is used to authenticate the user for certain requests.
-
-
 @app.route('/api/login', methods=['POST'])
 def login():
     req = request.get_json()
     username = req.get('username')
     password = req.get('password')
+
 
     user = User.query.filter_by(username=username).first()
 
@@ -69,8 +68,6 @@ def api():
     return jsonify({"message": "Welcome to the Penn Club Review API!."})
 
 # Returns relevant club information for GET requests. Public for everyone, requires no user info/authentication.
-
-
 def return_clubs(clubs):
     return_list = []
     for club in clubs:
@@ -85,8 +82,6 @@ def return_clubs(clubs):
     return jsonify(return_list)
 
 # Makes a club with the given JSON information for POST requests, pretty standard stuff
-
-
 def make_club():
     req = request.get_json()
     club_code, club_name = req.get('code'), req.get('name')
@@ -99,8 +94,6 @@ def make_club():
     return club_name + " created successfully!"
 
 # Returns a list of all clubs, or clubs that match the search parameter. You can also use the POST method to create a new club.
-
-
 @app.route('/api/clubs', methods=['GET', 'POST'])
 def clubs():
     if request.method == 'POST':
@@ -131,8 +124,6 @@ def modify_club_info(code):
         return "Club with code " + code + " not found", 404
 
 # Custon Route #1. Allows you to modify information about yourself. Requires authentification through JWT.
-
-
 @app.route('/api/userinfo/<string:username>', methods=['PATCH'])
 @jwt_required()
 def modify_user_info(username):
@@ -153,8 +144,6 @@ def modify_user_info(username):
         return "User with username " + username + " not found", 404
 
 # Displays cool, relevant, and public information for a user
-
-
 @app.route('/api/user/<string:username>')
 def show_profile(username):
     user = User.query.filter_by(username=username).first()
@@ -162,8 +151,6 @@ def show_profile(username):
 
 # Allows a user to add a club to their list of favorites. Requires authentification through JWT to make sure the user isn't just anyone.
 # Accordingly adjusts their profile as well as the club they entered
-
-
 @app.route('/api/<string:username>/favorite', methods=['POST'])
 @jwt_required()
 def favorite_club(username):
@@ -215,7 +202,7 @@ def clubs_by_tag():
     return jsonify({"Clubs with the " + tag + " include:": club_names}), 200
 
 
-# Custon Route #2. Matches a user with clubs based on their interests and the clubs tag.
+# Custon Route #2. Matches a user with clubs based on their interests and the clubs tag. Requires authentification through JWT.
 @app.route('/api/match-with-clubs/<string:username>', methods=['GET'])
 @jwt_required()
 def clubs_by_user_interests(username):
@@ -246,6 +233,67 @@ def clubs_by_user_interests(username):
     club_names = [club.name for club in matching_clubs]
 
     return jsonify({"Check out these clubs, they match with your interests: ": club_names}), 200
+
+
+# Custom Route #3. Gets all reviews/comments for a given club. Public for everyone, requires no user info/authentication.
+@app.route('/api/clubs/<string:code>/comments', methods=['GET'])
+def get_club_reviews(code):
+    club = Club.query.filter_by(code=code).first()
+
+    if club is None:
+        return jsonify({"message": "Club not found"}), 404
+
+    comments = ClubComment.query.filter_by(
+        club_code=code, parent_comment_id=None).all()
+    comments_data = []
+
+    for comment in comments:
+        comment_info = {
+            "id": comment.id,
+            "user_username": comment.user_username,
+            "text": comment.text,
+            "timestamp": comment.timestamp.isoformat(),
+            "replies": []
+        }
+
+        replies = ClubComment.query.filter_by(
+            parent_comment_id=comment.id).all()
+        for reply in replies:
+            reply_info = {
+                "id": reply.id,
+                "user_username": reply.user_username,
+                "text": reply.text,
+                "timestamp": reply.timestamp.isoformat()
+            }
+            comment_info["replies"].append(reply_info)
+
+        comments_data.append(comment_info)
+
+    return jsonify({"club_comments": comments_data}), 200
+
+# Custom Route #4. Allows a user to add a comment to a club. Requires authentification through JWT.
+@app.route('/api/clubs/<string:code>/comments', methods=['POST'])
+@jwt_required()
+def add_club_comment(code):
+    current_user_id = get_jwt_identity()
+    req = request.get_json()
+    comment_text = req.get('text')
+
+    club = Club.query.filter_by(code=code).first()
+
+    if club is None:
+        return jsonify({"message": "Club not found"}), 404
+
+    new_comment = ClubComment(
+        club_code=code,
+        user_username=current_user_id,
+        text=comment_text
+    )
+
+    db.session.add(new_comment)
+    db.session.commit()
+
+    return jsonify({"message": "Comment added successfully"}), 201
 
 
 if __name__ == '__main__':

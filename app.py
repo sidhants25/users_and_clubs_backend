@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 DB_FILE = "clubreview.db"
@@ -17,6 +17,13 @@ def main():
 @app.route('/api')
 def api():
     return jsonify({"message": "Welcome to the Penn Club Review API!."})
+
+
+@app.route('/clubs', methods=['GET'])
+def clubs():
+    clubs = Club.query.all()
+    return jsonify({"all clubs": [club.serialize() for club in clubs]})
+
 
 if __name__ == '__main__':
     app.run()

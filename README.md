@@ -34,7 +34,11 @@ If I had more time, I would have implemented autherization for clubs, where only
 
 VI. Bonus Features
 
+I implemented club comments through adding a new model and two routes. The ClubComment model uses two relationships for the commentor and the associated club. I also used a reltionship to support a thread: each comment reply has a parent/original comment. I'm able to store important parts of the comment, such as the commentor's username, their actual comment, and the time stamp of the comment. I added two new routes in the app.py section, one public route for getting comments for a certain club and one private route (JWT required) for posting/replying to a comment.
 
+VII. Final Thoughts & Reflections
+
+Overall, I really enjoyed working on this project (apart from the tedious time-to-time debugging) and learned a few new skills in Flask. Thanks for considering me for Penn Labs!
 ## Installation
 
 1. Click the green "use this template" button to make your own copy of this repository, and clone it. Make sure to create a **private repository**.

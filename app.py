@@ -235,9 +235,9 @@ def clubs_by_user_interests(username):
     return jsonify({"Check out these clubs, they match with your interests: ": club_names}), 200
 
 
-# Custom Route #3. Gets all reviews/comments for a given club. Public for everyone, requires no user info/authentication.
+# Custom Route. Gets all reviews/comments for a given club. Public for everyone, requires no user info/authentication.
 @app.route('/api/clubs/<string:code>/comments', methods=['GET'])
-def get_club_reviews(code):
+def get_club_comments(code):
     club = Club.query.filter_by(code=code).first()
 
     if club is None:
@@ -271,7 +271,7 @@ def get_club_reviews(code):
 
     return jsonify({"club_comments": comments_data}), 200
 
-# Custom Route #4. Allows a user to add a comment to a club. Requires authentification through JWT.
+# Custom Route. Allows a user to add a comment to a club. Requires authentification through JWT.
 @app.route('/api/clubs/<string:code>/comments', methods=['POST'])
 @jwt_required()
 def add_club_comment(code):

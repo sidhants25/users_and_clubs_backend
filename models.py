@@ -1,5 +1,7 @@
 from app import db
 from sqlalchemy import JSON
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Club(db.Model):
@@ -18,6 +20,15 @@ class User(db.Model):
     graduation_year = db.Column(db.String(4), unique=False, nullable=False)
     interests = db.Column(JSON)
     favorites = db.Column(JSON)
+
+    #Auth
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 # __table_args__ = (

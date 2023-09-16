@@ -5,7 +5,7 @@ import json
 
 def create_user():
     # with app.app_context():
-    josh = User(username = 'josh_iz_da_best', penn_id=12345678, name='Josh', major='Computer Science', graduation_year='2026', interests=['Athletics', 'Technology', 'Poker'], favorites= ['pppjo'])
+    josh = User(username = 'josh_iz_da_best', password_hash = 'Josh123', penn_id=12345678, name='Josh', major='Computer Science', graduation_year='2026', interests=['Athletics', 'Technology', 'Poker'], favorites= ['pppjo'])
     db.session.add(josh)
     db.session.commit()
 

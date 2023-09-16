@@ -1,6 +1,10 @@
 # Penn Labs Backend Challenge
 
 ## Documentation
+Hi,
+
+Thanks for checking out my solution for the Penn Labs backend challenge. Enjoy looking through!
+-Sid
 
 I. Defining Models
 

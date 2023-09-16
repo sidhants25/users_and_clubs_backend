@@ -1,3 +1,4 @@
+from models import *
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import create_access_token
@@ -13,7 +14,6 @@ app.config['JWT_SECRET_KEY'] = 'Sidhant123'  # Replace with a strong secret key
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
-from models import *
 
 # Part of Authentification. Register yourself with the database; the password you enter automatically gets hashed in the set_password method. Need to login next to get a token. This also makes sure
 # that the username is not already taken.
@@ -46,7 +46,6 @@ def login():
     req = request.get_json()
     username = req.get('username')
     password = req.get('password')
-
 
     user = User.query.filter_by(username=username).first()
 
@@ -107,8 +106,6 @@ def clubs():
         return return_clubs(clubs)
 
 # Allows you to modify information for an inputted club.
-
-
 @app.route('/api/clubs/<string:code>', methods=['PATCH'])
 def modify_club_info(code):
     req = request.get_json()

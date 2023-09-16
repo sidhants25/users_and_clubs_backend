@@ -7,6 +7,7 @@ class Club(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.String(), unique=False, nullable=False, default='')
     tags = db.Column(JSON)
+    students_who_favored = db.Column(JSON)
 
 
 class User(db.Model):
@@ -16,6 +17,7 @@ class User(db.Model):
     major = db.Column(db.String(100), unique=False, nullable=True)
     graduation_year = db.Column(db.String(4), unique=False, nullable=False)
     interests = db.Column(JSON)
+    favorites = db.Column(JSON)
 
 
 # __table_args__ = (
